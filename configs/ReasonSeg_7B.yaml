@@ -1,5 +1,5 @@
 system:
-  gpu_ids: "0,2,4,5"
+  gpu_ids: "0"
 
 paths:
   qwen_model_path: "MLLM/Qwen2.5_VL_7B/Qwen/Qwen2___5-VL-7B-Instruct" 

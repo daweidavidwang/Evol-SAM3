@@ -65,13 +65,18 @@ def main():
     import torch
     from src.models import QwenEngine, SAM3Engine
     from src.evaluator import Evaluator
+    from src.fbis_evaluator import FBISEvaluator
 
     os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
     
     qwen = QwenEngine(model_path=cfg.paths.qwen_model_path)
     sam = SAM3Engine(ckpt_path=cfg.paths.sam3_ckpt_path)
     
-    evaluator = Evaluator(cfg, qwen, sam)
+    dataset_type = getattr(cfg.dataset, "type", "reason_seg")
+    if dataset_type == "fbis":
+        evaluator = FBISEvaluator(cfg, qwen, sam)
+    else:
+        evaluator = Evaluator(cfg, qwen, sam)
     
     evaluator.run()
 

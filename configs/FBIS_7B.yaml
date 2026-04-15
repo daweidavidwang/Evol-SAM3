@@ -1,0 +1,43 @@
+system:
+  gpu_ids: "0"
+
+paths:
+  qwen_model_path: "MLLM/Qwen2.5_VL_7B/Qwen/Qwen2___5-VL-7B-Instruct"
+  sam3_ckpt_path: "sam3/sam3.pt"
+  # Not used by FBIS loader, but kept for compatibility with existing config parsing.
+  dataset_root: "/media/david/SSD/FBIS-22M"
+  log_dir: "logs/FBIS_7B"
+
+dataset:
+  type: "fbis"
+  list_path: "/media/david/SSD/FBIS-22M/test.txt"
+  # Fixed prompt used for every image/tile.
+  prompt: "Segment all agricultural fields / field parcels in the image."
+  jpeg_quality: 95
+  tiling:
+    enabled: true
+    tile_size: 1024
+    stride: 1024
+
+output:
+  output_root: "/media/david/SSD/field_result/evol_sam3_gpkg"
+  layer_name: "fields"
+  # Filter tiny polygons (units are CRS units; set to 0 to disable).
+  min_area: 0.0
+  # Optional simplification tolerance in CRS units (set null to disable).
+  simplify_tolerance: null
+
+debug:
+  mode: false
+
+evolution:
+  n_pop: 4
+  max_generations: 2
+  r_init: 0.0
+  pei_update_w: 1.0
+  theta_pei: 3.0
+  theta_iou: 0.95
+  theta_arena_skip: 0.85
+  max_arena_fights: 2
+  sam_conf_threshold: 0.6
+

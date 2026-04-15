@@ -5,6 +5,7 @@ try:
     from pycocotools.coco import COCO
 except ImportError:
     COCO = None
+from src.fbis_dataset import FBISDatasetLoader
 
 class RefCOCODatasetLoader:
     def __init__(self, root, dataset="refcoco", split="val"):
@@ -103,5 +104,11 @@ def get_dataset_loader(cfg):
     elif dataset_type == 'res':
         dataset_name = getattr(cfg.dataset, 'name', 'refcoco')
         return RefCOCODatasetLoader(root, dataset=dataset_name, split=split)
+    elif dataset_type == 'fbis':
+        list_path = getattr(cfg.dataset, 'list_path', None)
+        if not list_path:
+            # Keep a sensible default consistent with Delineate-Anything.
+            list_path = "/media/david/SSD/FBIS-22M/test.txt"
+        return FBISDatasetLoader(list_path=list_path)
     else:
         raise ValueError(f"Unknown dataset type: {dataset_type}")

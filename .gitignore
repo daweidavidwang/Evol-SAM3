@@ -12,3 +12,8 @@ __pycache__
 gt_masks_visualization
 vis_output
 sam3/sam3.pt
+
+# Local/dev artifacts (not meant for version control)
+*.safetensors
+*.zip
+condaenv.*.requirements.txt
