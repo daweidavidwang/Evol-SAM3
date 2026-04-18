@@ -191,6 +191,81 @@ python main.py --config configs/ReasonSeg_7B.yaml --resume logs/ReasonSeg_7B/Rea
 
 
 
+---
+
+## 🧭 Run on FBIS (GeoTIFF → field boundaries → `.gpkg`)
+
+This repo includes an **FBIS harness** that:
+- reads a list of GeoTIFF tiles from `dataset.list_path`
+- runs Evol-SAM3 on each tile (optionally tiled inference inside each GeoTIFF)
+- **polygonizes** the final binary mask and writes a **GeoPackage** per case: `<output_root>/<case>.gpkg`
+
+### 1. Configure paths
+
+Edit `configs/FBIS_7B.yaml` to match your machine:
+- **`paths.qwen_model_path`**: local folder for `Qwen/Qwen2.5-VL-7B-Instruct`
+- **`paths.sam3_ckpt_path`**: your `sam3.pt`
+- **`dataset.list_path`**: FBIS list file (e.g. `.../FBIS-22M/test.txt`)
+- **`output.output_root`**: where to write GeoPackages
+
+Relevant defaults (as shipped in this repo):
+
+```yaml
+dataset:
+  type: "fbis"
+  list_path: "/media/david/SSD/FBIS-22M/test.txt"
+  prompt: "Segment all agricultural fields / field parcels in the image."
+  tiling:
+    enabled: true
+    tile_size: 1024
+    stride: 1024
+
+output:
+  output_root: "/media/david/SSD/field_result/evol_sam3_gpkg"
+  layer_name: "fields"
+```
+
+### 2. Install geospatial deps (required for `.gpkg` export)
+
+The FBIS harness writes GeoPackages via `src/polygonize.py`, which requires:
+- `rasterio`
+- `fiona`
+- `shapely`
+
+If your environment does not already have them, install via conda-forge:
+
+```bash
+conda install -c conda-forge rasterio fiona shapely
+```
+
+### 3. Run the FBIS harness
+
+From the `Evol-SAM3/` directory:
+
+```bash
+python main.py --config configs/FBIS_7B.yaml
+```
+
+Notes:
+- **GPU selection**: either set `system.gpu_ids` in the YAML, or override on the CLI:
+
+```bash
+python main.py --config configs/FBIS_7B.yaml --gpu 0
+```
+
+- **Resume**: the FBIS runner keeps a checkpoint file at `logs/FBIS_7B/<run>/checkpoint_fbis.json` and will also skip cases if the target `<output_root>/<case>.gpkg` already exists. To resume a run, pass the run log dir:
+
+```bash
+python main.py --config configs/FBIS_7B.yaml --resume logs/FBIS_7B/FBIS_7B_YYYYMMDD_HHMMSS
+```
+
+### 4. Outputs
+
+Per case you’ll get:
+- **`<output.output_root>/<case>.gpkg`** with layer **`output.layer_name`** (default: `fields`)
+- Run logs under `paths.log_dir` (default: `logs/FBIS_7B/<timestamped_run>/`)
+
+
 ## 📝 Citation
 
 If you find our work helpful, please consider citing:
